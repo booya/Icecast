@@ -5,7 +5,7 @@ import requests
 from requests.exceptions import ConnectionError
 
 # global vars
-headers = {"User-agent": "Mozilla/5.0"}
+headers = {'User-agent': 'Mozilla/5.0'}
 httptimeout = 2.0
 
 
@@ -14,7 +14,7 @@ class IcecastError(Exception):
 
 
 class IcecastServer:
-    """Details relating to an Icecast server."""
+    '''Details relating to an Icecast server.'''
     def __init__(self, name, hostname, port, username, password):
         self.Name = name
         self.Hostname = hostname
@@ -23,20 +23,20 @@ class IcecastServer:
         self.Password = password
         self.Mounts = []
 
-        url = "http://{}:{}/admin/stats.xml".format(hostname, port)
+        url = 'http://{}:{}/admin/stats.xml'.format(hostname, port)
         try:
             req = requests.get(url, auth=(username, password),
                                headers=headers, timeout=httptimeout)
         except ConnectionError as e:
             raise IcecastError(e)
         if req.status_code == 401:
-            raise IcecastError("Authentication Failed.")
+            raise IcecastError('Authentication Failed.')
         elif req.status_code != 200:
-            raise IcecastError("Unknown Error.")
+            raise IcecastError('Unknown Error.')
         try:
             self.IceStats = ET.fromstring(req.text)
         except:
-            raise IcecastError("Error parsing xml.")
+            raise IcecastError('Error parsing xml.')
 
         # Common attributes
         self.Admin = self.IceStats.find('admin').text
@@ -58,7 +58,7 @@ class IcecastServer:
         self.StatsConnections = self.IceStats.find('stats_connections').text
 
         # -kh version has special attributes
-        if "-kh" in self.ServerID:
+        if '-kh' in self.ServerID:
             self.BannedIPs = self.IceStats.find('banned_IPs').text
             self.KBytesRead = self.IceStats.find('stream_kbytes_read').text
             self.KBytesSent = self.IceStats.find('stream_kbytes_sent').text
@@ -69,14 +69,14 @@ class IcecastServer:
             self.Mounts.append(IcecastMount(mount, self))
 
 class IcecastMount:
-    """Details pertaining to an Icecast Mount."""
+    '''Details pertaining to an Icecast Mount.'''
     def __init__(self, mount, server):
         self.IceStats = mount
         self.Server = server
         self.Listeners = []
         self.Name = self.IceStats.get('mount')
 
-        url = "http://{}:{}/admin/listclients?mount={}".format(
+        url = 'http://{}:{}/admin/listclients?mount={}'.format(
                 server.Hostname, server.Port,
                 self.Name)
         try:
@@ -88,7 +88,7 @@ class IcecastMount:
         try:
             self.ListenerStats = ET.fromstring(req.text)
         except:
-            raise IcecastError("Invalid Mount XML.")
+            raise IcecastError('Invalid Mount XML.')
 
         # Miscellaneous Information
         self.AudioInfo = self.IceStats.find('audio_info').text
@@ -111,7 +111,7 @@ class IcecastMount:
         self.UserAgent = self.IceStats.find('user_agent').text
 
         # -kh version has special attributes
-        if "-kh" in server.ServerID:
+        if '-kh' in server.ServerID:
             self.Artist = self.IceStats.find('artist').text
             self.AudioCodecID = self.IceStats.find('audio_codecid').text
             self.Connected = self.IceStats.find('connected').text
@@ -127,7 +127,7 @@ class IcecastMount:
 
 
 class IcecastListener:
-    """An Icecast listener."""
+    '''An Icecast listener.'''
     def __init__(self, listener):
         self.IcecastID = listener.get('id')
         self.IP = listener.findtext('IP')
